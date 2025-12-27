@@ -12,6 +12,7 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+    validate-migration-naming: true
 
 springdoc:
   api-docs:
