@@ -26,7 +26,7 @@ public class JwtService {
 		byte[] secretBytes = props.secret().getBytes(StandardCharsets.UTF_8);
 		if (secretBytes.length < 32) {
 			throw new IllegalStateException(
-					"JWT secret muito curto. Para HS256, use pelo menos 32 bytes (256 bits)."
+					"JWT secret too short."
 			);
 		}
 		this.key = Keys.hmacShaKeyFor(secretBytes);
