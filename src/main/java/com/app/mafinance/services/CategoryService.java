@@ -4,6 +4,7 @@ import com.app.mafinance.dtos.CreateCategoryRequest;
 import com.app.mafinance.dtos.UpdateCategoryRequest;
 import com.app.mafinance.model.Category;
 import com.app.mafinance.repositories.CategoryRepository;
+import com.app.mafinance.repositories.EntryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +14,11 @@ import java.util.List;
 public class CategoryService {
 
 	private final CategoryRepository repo;
+	private final EntryRepository entryRepo;
 
-	public CategoryService(CategoryRepository repo) {
+	public CategoryService(CategoryRepository repo, EntryRepository entryRepo) {
 		this.repo = repo;
+		this.entryRepo = entryRepo;
 	}
 
 	@Transactional
@@ -58,7 +61,13 @@ public class CategoryService {
 	@Transactional
 	public void delete(Long userId, Long categoryId) {
 		var cat = repo.findByIdAndUserId(categoryId, userId)
-				.orElseThrow(() -> new IllegalArgumentException("Category not found."));
+				.orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
+
+		boolean inUse = entryRepo.existsByUserIdAndCategoryId(userId, categoryId);
+		if (inUse) {
+			throw new IllegalArgumentException("Cannot delete category that is in use by entries.");
+		}
+
 		repo.delete(cat);
 	}
 
