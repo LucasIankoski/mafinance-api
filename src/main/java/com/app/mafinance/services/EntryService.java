@@ -113,5 +113,14 @@ public class EntryService {
 		}
 		return out;
 	}
+
+	@Transactional
+	public Entry updatePaid(Long userId, Long entryId, boolean paid) {
+		var entry = entryRepo.findByIdAndUserId(entryId, userId)
+				.orElseThrow(() -> new IllegalArgumentException("Entry not found."));
+
+		entry.setPaid(paid);
+		return entryRepo.save(entry);
+	}
 }
 

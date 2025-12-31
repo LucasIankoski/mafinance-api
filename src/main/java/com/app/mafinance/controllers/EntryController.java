@@ -1,15 +1,17 @@
 package com.app.mafinance.controllers;
 
-
 import com.app.mafinance.dtos.CreateInstallmentExpenseRequest;
 import com.app.mafinance.dtos.CreateRecurringIncomeRequest;
 import com.app.mafinance.dtos.EntryResponse;
+import com.app.mafinance.dtos.UpdatePaidRequest;
 import com.app.mafinance.services.EntryService;
 import com.app.mafinance.services.CurrentUserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,9 +58,9 @@ public class EntryController {
 		Long userId = currentUserService.requireUserId(auth);
 
 		var entries = entryService.createRecurringIncome(userId, req).stream()
-				.map(e -> new EntryResponse(
-						e.getId(), e.getEntryType(), e.getDescription(), e.getAmount(), e.getEntryDate(),
-						e.isPaid(), e.getCategoryId(), e.getGroupId(), e.getInstallmentNo()
+				.map(entryResponse -> new EntryResponse(
+						entryResponse.getId(), entryResponse.getEntryType(), entryResponse.getDescription(), entryResponse.getAmount(), entryResponse.getEntryDate(),
+						entryResponse.isPaid(), entryResponse.getCategoryId(), entryResponse.getGroupId(), entryResponse.getInstallmentNo()
 				))
 				.toList();
 
@@ -81,5 +83,21 @@ public class EntryController {
 				.toList();
 
 		return ResponseEntity.ok(entries);
+	}
+
+	@PatchMapping("/{id}/paid")
+	public ResponseEntity<EntryResponse> updatePaid(
+			Authentication auth,
+			@PathVariable("id") Long id,
+			@Valid @RequestBody UpdatePaidRequest req
+	) {
+		Long userId = currentUserService.requireUserId(auth);
+
+		var entry = entryService.updatePaid(userId, id, req.paid());
+
+		return ResponseEntity.ok(new EntryResponse(
+				entry.getId(), entry.getEntryType(), entry.getDescription(), entry.getAmount(), entry.getEntryDate(),
+				entry.isPaid(), entry.getCategoryId(), entry.getGroupId(), entry.getInstallmentNo()
+		));
 	}
 }
